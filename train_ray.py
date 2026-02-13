@@ -14,7 +14,7 @@ def main():
     trainer = TorchTrainer(
         train_loop_per_worker=train_coral_fsdp_tune,
         scaling_config=ScalingConfig(
-            num_workers=2,
+            num_workers=8,
             use_gpu=True,
         ),
     )
