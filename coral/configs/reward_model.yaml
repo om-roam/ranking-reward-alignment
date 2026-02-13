@@ -26,8 +26,8 @@ data:
 
 training:
   device: cuda
-  batch_size: 4
-  accum_steps: 8
+  batch_size: 16
+  accum_steps: 4
   block_size: 33
   focal_warmup_steps: 128
   num_layers: 28
