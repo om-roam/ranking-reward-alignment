@@ -1,0 +1,149 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: coral-logs-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: coral-code-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: coral-checkpoints-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 50Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: coral-data-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fsdp
+spec:
+  clusterIP: None
+  selector:
+    app: fsdp
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fsdp
+spec:
+  serviceName: fsdp
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fsdp
+  template:
+    metadata:
+      labels:
+        app: fsdp
+    spec:
+      containers:
+        - name: trainer
+          image: registry.local:30500/fsdp:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+
+          env:
+            - name: MASTER_ADDR
+              value: fsdp-0.fsdp.default.svc.cluster.local
+            - name: MASTER_PORT
+              value: "29500"
+            - name: HF_HOME
+              value: /data/hf
+            - name: TRANSFORMERS_CACHE
+              value: /data/hf
+            - name: HF_HUB_DISABLE_TELEMETRY
+              value: "1"
+            - name: TRANSFORMERS_OFFLINE
+              value: "1"
+            - name: HF_DATASETS_OFFLINE
+              value: "1"
+            - name: NCCL_DEBUG
+              value: INFO
+            - name: NCCL_SOCKET_IFNAME
+              value: eth0
+            - name: TORCH_NCCL_ASYNC_ERROR_HANDLING
+              value: "1"
+            - name: MLFLOW_TRACKING_URI
+              value: file:/logs/mlruns
+            - name: MLFLOW_EXPERIMENT_NAME
+              value: coral-fsdp
+
+          command: ["/bin/bash", "-lc"]
+          args:
+            - |
+              set -euo pipefail
+
+              echo "Hostname: $HOSTNAME"
+              NODE_RANK=${HOSTNAME##*-}
+              echo "Derived node rank: ${NODE_RANK}"
+
+              pip install -e /code
+
+              torchrun \
+                --nnodes=2 \
+                --nproc_per_node=1 \
+                --node-rank=${NODE_RANK} \
+                --rdzv-backend=c10d \
+                --rdzv-endpoint=${MASTER_ADDR}:${MASTER_PORT} \
+                --rdzv-id=coral-fsdp \
+                /code/train_fsdp.py
+
+          volumeMounts:
+            - name: code
+              mountPath: /code
+            - name: checkpoints
+              mountPath: /checkpoints
+            - name: logs
+              mountPath: /logs
+            - name: data
+              mountPath: /data
+
+      volumes:
+        - name: code
+          persistentVolumeClaim:
+            claimName: coral-code-pvc
+        - name: checkpoints
+          persistentVolumeClaim:
+            claimName: coral-checkpoints-pvc
+        - name: logs
+          persistentVolumeClaim:
+            claimName: coral-logs-pvc
+        - name: data
+          persistentVolumeClaim:
+            claimName: coral-data-pvc

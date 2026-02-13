@@ -1,0 +1,73 @@
+# ===============================
+# Reward Model Training Config
+# ===============================
+# Qwen/Qwen3-Embedding-0.6B | hyp1231/blair-roberta-large
+
+model:
+  name: hyp1231/blair-roberta-large
+  revision: null
+  torch_dtype: float32
+  trust_remote_code: true
+
+run:
+  save_path: /checkpoints
+  log_path: /logs
+  start_from_step: 0
+  log_every: 1
+  save_every: 1024
+  seed: 42
+
+data:
+  num_classes: 4
+  max_length: 512
+  shuffle_docs_per_query: true
+  train_path: /data/train/training_data_reviews.pkl
+  eval_path: /data/eval
+
+training:
+  device: cuda
+  batch_size: 4
+  accum_steps: 8
+  block_size: 33
+  focal_warmup_steps: 128
+  num_layers: 28
+  peft: true
+
+optimizer:
+  name: adamw
+  weight_decay: 1.0e-2
+
+  param_groups:
+    encoder:
+      lr: 1.0e-4
+      name_prefix: encoder_layers
+
+    head:
+      lr: 1.0e-4
+      name_prefix: coral_head
+
+  betas: [0.9, 0.999]
+  eps: 1.0e-8
+  max_grad_norm: 1.0
+
+scheduler:
+  name: cosine
+  warmup_ratio: 0.05
+
+loss:
+  name: focal_coral
+  gamma_init: 1.05
+  gamma: 1.5
+  mono_coef: 0.1
+  gap_coef: 0.05
+  scale_coef: 0.01
+  min_logit_scale: 0.2
+  use_ndcg: true
+  lambda_weight: 0.01
+
+mixed_precision:
+  enabled: true
+  dtype: bfloat16
+
+distributed:
+  backend: fsdp
