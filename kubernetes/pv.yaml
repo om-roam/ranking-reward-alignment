@@ -9,7 +9,7 @@ spec:
     - ReadWriteMany
   storageClassName: ""
   nfs:
-    server: 192.168.10.1
+    server: ###.###.##.#
     path: /srv/nfs/share/mlflow
 ---
 apiVersion: v1
@@ -23,7 +23,7 @@ spec:
     - ReadWriteMany
   storageClassName: ""
   nfs:
-    server: 192.168.10.1
+    server: ###.###.##.#
     path: /srv/nfs/share/coral/logs
 ---
 apiVersion: v1
@@ -37,7 +37,7 @@ spec:
     - ReadWriteMany
   storageClassName: ""
   nfs:
-    server: 192.168.10.1
+    server: ###.###.##.#
     path: /srv/nfs/share/coral/code
 ---
 apiVersion: v1
@@ -51,7 +51,7 @@ spec:
     - ReadWriteMany
   storageClassName: ""
   nfs:
-    server: 192.168.10.1
+    server: ###.###.##.#
     path: /srv/nfs/share/coral/checkpoints
 ---
 apiVersion: v1
@@ -65,5 +65,5 @@ spec:
     - ReadWriteMany
   storageClassName: ""
   nfs:
-    server: 192.168.10.1
+    server: ###.###.##.#
     path: /srv/nfs/share/coral/data
