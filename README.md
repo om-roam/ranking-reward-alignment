@@ -11,3 +11,6 @@ A modular PyTorch framework for training **reward models** for search/recommenda
 
 ## Core idea
 Traditional supervised ranking optimizes proxy labels (clicks, purchases) and can drift from true business objectives. This framework trains a reward model that produces **calibrated, comparable scores** across queries and time, and supports **relative optimization** to reduce reward hacking and stabilize training.
+
+## Contact
+Omkar Patil @ informomp@gmail.com
