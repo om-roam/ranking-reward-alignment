@@ -52,36 +52,25 @@ def lambda_ndcg_batch(
 
 def compute_lambda_ndcg_loss_from_logits(
     *,
-    logits: torch.Tensor,   # [B, N, C]
-    labels: torch.Tensor,   # [B, N, C]
-    mask: torch.Tensor,     # [B, N] (True = valid doc)
+    logits: torch.Tensor,   
+    labels: torch.Tensor,   
+    mask: torch.Tensor,    
 ):
-    """
-    Batch-compatible LambdaNDCG surrogate loss.
-    - No query mixing
-    - Mask handled correctly
-    - Works for B >= 1
-    """
     B, N, C = logits.shape
     device = logits.device
 
-    # ---- Expected ordinal score (CORAL expectation) ----
-    scores = torch.sigmoid(logits).sum(dim=2)   # [B, N]
-    rels = labels.sum(dim=2)                    # [B, N]
+    scores = torch.sigmoid(logits).sum(dim=2)  
+    rels = labels.sum(dim=2)                  
 
-    # ---- Apply mask BEFORE LambdaNDCG ----
     mask = mask.bool()
     scores = scores.masked_fill(~mask, -1e9)
     rels = rels * mask.float()
 
-    # ---- LambdaRank gradients ----
     lambda_grads, _ = lambda_ndcg_batch(
         scores=scores,
         rels=rels,
-    )  # [B, N]
+    )  
 
-    # ---- Surrogate loss (LambdaRank trick) ----
-    # Important: use ORIGINAL scores (not detached)
-    loss_per_query = (scores * lambda_grads).sum(dim=1)  # [B]
+    loss_per_query = (scores * lambda_grads).sum(dim=1)  
 
     return loss_per_query.mean()
