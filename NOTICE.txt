@@ -1,0 +1,9 @@
+Ranking Reward Alignment Copyright 2026 Omkar Patil
+
+This project was originally developed by Omkar Patil.
+
+If you use this software in research, publications, blog posts, or
+production systems, please cite:
+
+Omkar Patil. “Ranking Reward Alignment”. GitHub repository.
+https://github.com/om-roam/ranking-reward-alignment
