@@ -85,6 +85,9 @@ See:
 If you use this work in research or production systems, please retain attribution as described in the NOTICE file.
 
 ---
+## Contact
+Omkar Patil @ informomp@gmail.com
+---
 
 ## Citation
 
@@ -99,5 +102,4 @@ If you use CORAL in research or publications, please cite:
   url = {https://github.com/om-roam/ranking-reward-alignment}
 }
 
-## Contact
-Omkar Patil @ informomp@gmail.com
+
